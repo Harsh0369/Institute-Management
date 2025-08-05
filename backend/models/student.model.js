@@ -1,19 +1,32 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({
-  student_id: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  Branch: {
-    type: String,
-    required: true,
-    enum: ['CSE', 'IT', 'Mechanical', 'ECE', 'Electrical']
-  },
-  Admission_Date: {
-    type: Date,
-  },
-}, { timestamps: true });
+const studentSchema = new mongoose.Schema(
+  {
+    student_id: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    studentProfile: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+    },
 
-module.exports = mongoose.model('User', userSchema);
+    Branch: {
+      type: String,
+      required: true,
+      enum: ["CSE", "IT", "Mechanical", "ECE", "Electrical"],
+    },
+    Admission_Date: {
+      type: Date,
+    },
+    semester: {
+      type: Number,
+      required: true,
+      enum: [1, 2, 3, 4, 5, 6, 7, 8],
+    },
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model('student', studentSchema);

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from "mongoose";
 
 /*
     marks
@@ -17,10 +17,30 @@ const mongoose = require('mongoose')
     notice
 */
 
-const courseModel = mongoose.Schema({
+const courseModel = mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
+    semester: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-})
+const course = mongoose.model("course", courseModel);
 
-const course = mongoose.model('course', courseModel)
-
-module.exports = course
+export default course;
