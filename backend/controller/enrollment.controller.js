@@ -1,35 +1,41 @@
-import Enrollment from "../models/enrollment.model.js";
-import express from "express";
+export const createEnrollments = async (req, res) => {
+  const studentId = req.studentId;
+  const { courseIds } = req.body;
 
-export const createEnrollment = async (req, res) => {
+  if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
+    return res
+      .status(400)
+      .json({ message: "Course IDs must be a non-empty array" });
+  }
+
   try {
-    const { studentId, courseId } = req.body;
-
-    if (!studentId || !courseId) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const existing = await Enrollment.findOne({
-      student: studentId,
-      course: courseId,
-    });
-    if (existing) {
-      return res
-        .status(409)
-        .json({ message: "Student is already enrolled in this course" });
-    }
-
-    const newEnrollment = new Enrollment({
-      student: studentId,
-      course: courseId,
+    const existingEnrollments = await Enrollment.find({
+      studentId,
+      courseId: { $in: courseIds },
     });
 
-    const savedEnrollment = await newEnrollment.save();
-    res.status(201).json(savedEnrollment);
-  } catch (error) {
-    res.status(500).json({
-      message: "Error creating enrollment",
-      error: error.message,
+    const alreadyEnrolledIds = existingEnrollments.map((e) =>
+      e.courseId.toString()
+    );
+    const newCourseIds = courseIds.filter(
+      (id) => !alreadyEnrolledIds.includes(id)
+    );
+
+    const enrollmentsToCreate = newCourseIds.map((courseId) => ({
+      studentId,
+      courseId,
+    }));
+
+    const createdEnrollments = await Enrollment.insertMany(enrollmentsToCreate);
+
+    return res.status(201).json({
+      message: "Enrollments created successfully",
+      enrollments: createdEnrollments,
+      skipped: alreadyEnrolledIds,
     });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ message: "Failed to create enrollments", error: err });
   }
 };

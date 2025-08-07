@@ -22,11 +22,15 @@ const userSchema = new mongoose.Schema(
       required: true,
       enum: ["Guru Ghasidas University"],
     },
+    studentProfile: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "student",
+    },
     role: {
       type: String,
-      enum: ["user", "admin", "moderator", "teacher"],
+      enum: ["student", "admin", "moderator", "teacher"],
       required: true,
-      default: "user",
+      default: "student",
     },
   },
   { timestamps: true }
