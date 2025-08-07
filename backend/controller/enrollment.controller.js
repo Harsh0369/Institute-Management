@@ -1,5 +1,15 @@
+import Enrollment from "../models/enrollment.model.js";
+import course from "../models/course.model.js";
+import Student from "../models/student.model.js"
+
 export const createEnrollments = async (req, res) => {
-  const studentId = req.studentId;
+  const student = await Student.findOne({ studentProfile: req.user.id });
+  if (!student) {
+    return res.status(404).json({ message: "Student not found" });
+  }
+
+  const studentId = student.id;
+  const semester = student.semester;
   const { courseIds } = req.body;
 
   if (!courseIds || !Array.isArray(courseIds) || courseIds.length === 0) {
@@ -12,6 +22,7 @@ export const createEnrollments = async (req, res) => {
     const existingEnrollments = await Enrollment.find({
       studentId,
       courseId: { $in: courseIds },
+      semester,
     });
 
     const alreadyEnrolledIds = existingEnrollments.map((e) =>
@@ -24,6 +35,7 @@ export const createEnrollments = async (req, res) => {
     const enrollmentsToCreate = newCourseIds.map((courseId) => ({
       studentId,
       courseId,
+      semester,
     }));
 
     const createdEnrollments = await Enrollment.insertMany(enrollmentsToCreate);
